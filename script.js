@@ -1,5 +1,26 @@
 // script.js — TURBO COACH vCALIBRATED (ALL LANGUAGES)
-// WITH EXPLICIT GYM PRESCRIPTION (CLASSROOM-SAFE)
+// WITH EXPLICIT GYM + RANDOM JC PROMPTS
+// NO MODULES. NO IMPORTS. CLASSROOM-SAFE.
+
+// ==============================
+// PROMPT BANK (JC-APPROPRIATE)
+// ==============================
+const PROMPTS = [
+  "Describe your best friend",
+  "Describe someone in your family",
+  "Describe your house or flat",
+  "Describe your bedroom",
+  "Describe your school",
+  "Describe a teacher you like",
+  "Describe your favourite place",
+  "Describe your favourite hobby",
+  "Describe a typical weekend",
+  "Describe your town or area"
+];
+
+function getRandomPrompt() {
+  return PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
+}
 
 // ==============================
 // VERB ATTEMPT DETECTION
@@ -152,14 +173,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const runBtn = document.getElementById("runBtn");
   const out = document.getElementById("out");
   const answerBox = document.getElementById("answer");
+  const promptBox = document.getElementById("prompt");
 
   function reset() {
     answerBox.value = "";
     answerBox.disabled = false;
     runBtn.innerText = "Ask coach";
+    promptBox.value = getRandomPrompt();
     answerBox.focus();
     out.classList.add("hidden");
   }
+
+  // initial prompt
+  promptBox.value = getRandomPrompt();
 
   runBtn.onclick = () => {
     const lang = document.getElementById("lang").value;
