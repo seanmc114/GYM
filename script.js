@@ -1,10 +1,37 @@
-// script.js — TURBO COACH vCALIBRATED (ALL LANGUAGES)
-// WITH MINIMAL GYM ENFORCEMENT (v1)
+// script.js — TURBO COACH vCALIBRATED
+// WITH INLINE GYM (NO MODULES, SAFE FOR GITHUB PAGES)
 
 // ==============================
-// IMPORT GYM (NEW, SAFE)
+// GYM (INLINE, MINIMAL)
 // ==============================
-import { runGym } from "./gym.js";
+function runGym(focus, onPass) {
+
+  if (focus !== "Missing verb") {
+    onPass();
+    return;
+  }
+
+  const out = document.getElementById("out");
+
+  out.classList.remove("hidden");
+  out.innerHTML = `
+    <div class="score">Gym</div>
+    <div class="focus">Add a verb</div>
+    <p>Fix the sentence by adding a verb.</p>
+    <p><em>Mi amigo alto.</em></p>
+    <textarea id="gymInput" rows="2"></textarea>
+    <button id="gymCheck">Check</button>
+  `;
+
+  document.getElementById("gymCheck").onclick = () => {
+    const t = document.getElementById("gymInput").value.toLowerCase();
+    if (t.includes(" es ") || t.startsWith("es ") || t.includes(" tiene ")) {
+      onPass();
+    } else {
+      alert("Add a verb (es / tiene) and try again.");
+    }
+  };
+}
 
 // ==============================
 // VERB ATTEMPT DETECTION
@@ -40,23 +67,20 @@ function hasConnector(text) {
 
 function hasOpinion(text, lang) {
   const t = text.toLowerCase();
-
   if (lang === "es") return /\b(creo que|pienso que|me parece que|porque)\b/.test(t);
   if (lang === "fr") return /\b(je pense que|à mon avis|parce que)\b/.test(t);
   if (lang === "de") return /\b(ich denke|meiner meinung nach|weil)\b/.test(t);
   if (lang === "ga") return /\b(sílim go|dar liom|mar go)\b/.test(t);
-
   return false;
 }
 
 // ==============================
-// LOCAL COACH (UNCHANGED)
+// LOCAL COACH
 // ==============================
 function localCoach(answer, lang) {
 
   const words = wordCount(answer);
 
-  // --- No verb attempt ---
   if (!hasVerb(answer, lang)) {
     return {
       score: 0,
@@ -69,7 +93,6 @@ function localCoach(answer, lang) {
     };
   }
 
-  // --- Fragment / single idea ---
   if (words <= 3) {
     return {
       score: 2,
@@ -78,49 +101,31 @@ function localCoach(answer, lang) {
     };
   }
 
-  // --- Sentence but thin / unclear ---
   if (!hasConnector(answer) && !hasOpinion(answer, lang)) {
     return {
       score: 5,
       focus: "Development / word choice",
-      msg:
-        lang === "es"
-          ? "Add a clearer detail — e.g. **es alto**, **es simpático**, or explain it."
-          : lang === "fr"
-          ? "Add a clearer detail — e.g. **il est grand**, **il est sympa**."
-          : lang === "de"
-          ? "Add a clearer detail — e.g. **er ist groß**, **er ist nett**."
-          : "Add a clearer detail — describe appearance or personality."
+      msg: "Add a clearer detail."
     };
   }
 
-  // --- Developed, but no opinion/reason ---
   if (!hasOpinion(answer, lang)) {
     return {
       score: 7,
       focus: "Development",
-      msg:
-        lang === "es"
-          ? "Good answer. Add an opinion — start with **Creo que…** or a reason with **porque…**."
-          : lang === "fr"
-          ? "Good answer. Add an opinion — start with **Je pense que…** or **parce que…**."
-          : lang === "de"
-          ? "Good answer. Add an opinion — start with **Ich denke, dass…** or **weil…**."
-          : "Good answer. Add an opinion — start with **Sílim go…**."
+      msg: "Good answer. Add an opinion or reason."
     };
   }
 
-  // --- Opinion / reason present (top band teaser) ---
   return {
     score: 8,
     focus: "Quality",
-    msg:
-      "Very good. Check accuracy and add one more specific detail to push it further."
+    msg: "Very good. Add one more specific detail."
   };
 }
 
 // ==============================
-// UI LOGIC (MINIMALLY AMENDED)
+// UI LOGIC
 // ==============================
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -131,8 +136,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function reset() {
     answerBox.value = "";
     answerBox.disabled = false;
-    answerBox.focus();
     runBtn.innerText = "Ask coach";
+    answerBox.focus();
   }
 
   reset();
@@ -145,8 +150,6 @@ document.addEventListener("DOMContentLoaded", () => {
     answerBox.disabled = true;
 
     const result = localCoach(answer, lang);
-
-    // VERY LOW SCORE → GYM REQUIRED
     const forceGym = result.score <= 3;
 
     out.classList.remove("hidden");
@@ -158,17 +161,12 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     document.getElementById("retryBtn").onclick = () => {
-
       if (forceGym) {
-        runGym(result.focus, () => {
-          reset();
-          out.classList.add("hidden");
-        });
-        return;
+        runGym(result.focus, reset);
+      } else {
+        reset();
+        out.classList.add("hidden");
       }
-
-      reset();
-      out.classList.add("hidden");
     };
   };
 });
