@@ -1,4 +1,10 @@
 // script.js — TURBO COACH vCALIBRATED (ALL LANGUAGES)
+// WITH MINIMAL GYM ENFORCEMENT (v1)
+
+// ==============================
+// IMPORT GYM (NEW, SAFE)
+// ==============================
+import { runGym } from "./gym.js";
 
 // ==============================
 // VERB ATTEMPT DETECTION
@@ -44,7 +50,7 @@ function hasOpinion(text, lang) {
 }
 
 // ==============================
-// LOCAL COACH
+// LOCAL COACH (UNCHANGED)
 // ==============================
 function localCoach(answer, lang) {
 
@@ -114,7 +120,7 @@ function localCoach(answer, lang) {
 }
 
 // ==============================
-// UI LOGIC
+// UI LOGIC (MINIMALLY AMENDED)
 // ==============================
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -140,6 +146,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const result = localCoach(answer, lang);
 
+    // VERY LOW SCORE → GYM REQUIRED
+    const forceGym = result.score <= 3;
+
     out.classList.remove("hidden");
     out.innerHTML = `
       <div class="score">Score: ${result.score} / 10</div>
@@ -149,6 +158,15 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     document.getElementById("retryBtn").onclick = () => {
+
+      if (forceGym) {
+        runGym(result.focus, () => {
+          reset();
+          out.classList.add("hidden");
+        });
+        return;
+      }
+
       reset();
       out.classList.add("hidden");
     };
